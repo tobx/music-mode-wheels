@@ -1,6 +1,7 @@
 # Music Mode Wheels
 
-This repository contains the source code for the website [www.to-be.done.com](https://www.to-be.done.com).
+This is the repository of [tobx.github.io/music-mode-wheels](https://tobx.github.io/music-mode-wheels/).
 
-Find more information about music modes on [Wikipedia](https://en.wikipedia.org/wiki/Mode_(music)).
+A website that displays music modes as interactive wheels.
 
+Find more information about music modes on [Wikipedia](<https://en.wikipedia.org/wiki/Mode_(music)>).
