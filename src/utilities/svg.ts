@@ -1,16 +1,11 @@
-export type Point = {
-  x: number;
-  y: number;
-};
-
 const degToRad = Math.PI / 180;
 
-export function circlePathDef(r: number) {
+export function circlePathDef(radius: number) {
   return [
-    `M 0 ${r}`,
-    `a ${r} ${r} 0 0 1 0 ${-2 * r}`,
-    `a ${r} ${r} 0 0 1 0 ${2 * r}`,
-  ].join("");
+    `M 0 ${radius}`,
+    `a ${radius} ${radius} 0 0 1 0 ${-2 * radius}`,
+    `a ${radius} ${radius} 0 0 1 0 ${2 * radius}`,
+  ].join(" ");
 }
 
 export function ringArcPathDef(
@@ -18,11 +13,11 @@ export function ringArcPathDef(
   outerRadius: number,
   angle: number
 ) {
-  const rad = angle * degToRad;
-  const cos = Math.cos(rad);
-  const sin = Math.sin(rad);
-  const inner: Point = { x: cos * innerRadius, y: sin * innerRadius };
-  const outer: Point = { x: cos * outerRadius, y: sin * outerRadius };
+  const radians = angle * degToRad;
+  const cos = Math.cos(radians);
+  const sin = Math.sin(radians);
+  const inner = { x: cos * innerRadius, y: sin * innerRadius };
+  const outer = { x: cos * outerRadius, y: sin * outerRadius };
   return [
     `M ${outerRadius} 0`,
     `A ${outerRadius} ${outerRadius} 0 0 1 ${outer.x} ${outer.y}`,
