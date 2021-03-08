@@ -1,6 +1,6 @@
 <script lang="ts">
-  import { modeDefs } from "@/music/modes";
   import ScaleWheel from "./components/ScaleWheel.svelte";
+  import { modeDefs } from "./music/modes";
 
   const modes = [
     { name: "Melodic Major", defs: modeDefs.melodic.major },

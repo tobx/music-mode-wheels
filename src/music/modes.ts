@@ -1,6 +1,13 @@
-export type ModeDef = [number, string];
+export type ModeDef = {
+  name: string;
+  semitones: number;
+};
 
-const melodicMajor: ModeDef[] = [
+function create(defs: [number, string][]): ModeDef[] {
+  return defs.map(([semitones, name]) => ({ name, semitones }));
+}
+
+const melodicMajor = create([
   [0, "Ionian"],
   [2, "Dorian"],
   [4, "Phrygian"],
@@ -8,9 +15,9 @@ const melodicMajor: ModeDef[] = [
   [7, "Mixolydian"],
   [9, "Aeolian"],
   [11, "Locrian"],
-];
+]);
 
-const melodicMinor: ModeDef[] = [
+const melodicMinor = create([
   [0, "Melodic minor"],
   [2, "Dorian ♭9"],
   [3, "Lydian aug."],
@@ -18,9 +25,9 @@ const melodicMinor: ModeDef[] = [
   [7, "Mixolydian ♭13"],
   [9, "Aeolian ♭5"],
   [11, "Altered"],
-];
+]);
 
-const harmonicMajor: ModeDef[] = [
+const harmonicMajor = create([
   [0, "Harmonic major"],
   [2, "Dorian ♭5"],
   [4, "Altered ♮5"],
@@ -28,9 +35,9 @@ const harmonicMajor: ModeDef[] = [
   [7, "Mixolydian ♭9"],
   [8, "Lydian aug. ♯9"],
   [11, "Locrian 𝄫7"],
-];
+]);
 
-const harmonicMinor: ModeDef[] = [
+const harmonicMinor = create([
   [0, "Harmonic minor"],
   [2, "Locrian ♮13"],
   [3, "Ionian aug."],
@@ -38,7 +45,7 @@ const harmonicMinor: ModeDef[] = [
   [7, "Mixolydian ♭9 ♭13"],
   [8, "Lydian ♯2"],
   [11, "Altered ♭♭7"],
-];
+]);
 
 export const modeDefs = {
   melodic: {

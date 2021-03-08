@@ -1,7 +1,8 @@
 <script lang="ts">
-  import type { ModeDef } from "@/music/modes";
-
   import { circlePathDef, ringArcPathDef } from "@/utilities/svg";
+
+  import type { ModeDef } from "@/music/modes";
+  import { createEventDispatcher } from "svelte";
 
   export let outerRadius: number;
 
@@ -9,30 +10,49 @@
 
   export let modeDefs: ModeDef[];
 
+  const dispatch = createEventDispatcher<{ modeChanged: number }>();
+
   const fontSize = 8;
 
   const textRadius = (outerRadius + innerRadius) / 2;
 
-  const modes = modeDefs.map(([semitones, name]) => {
-    return {
-      name,
-      rotation: 30 * semitones,
-      path: ringArcPathDef(innerRadius, outerRadius, 30),
-      get angle() {
-        return -this.rotation;
-      },
-      get fontSize() {
-        return Math.min(fontSize, 88 / this.name.length);
-      },
-    };
-  });
+  class Mode {
+    public path: string;
 
-  let activeMode = modes[0];
+    constructor(public def: ModeDef) {
+      this.path = ringArcPathDef(innerRadius, outerRadius, 30);
+    }
+
+    get angle() {
+      return -this.rotation;
+    }
+
+    get fontSize() {
+      return Math.min(fontSize, 88 / this.name.length);
+    }
+
+    get name() {
+      return this.def.name;
+    }
+
+    get rotation() {
+      return 30 * this.def.semitones;
+    }
+  }
+
+  const modes = modeDefs.map((def) => new Mode(def));
+
+  function selectMode(mode: Mode, i: number) {
+    selectedMode = mode;
+    dispatch("modeChanged", i);
+  }
+
+  let selectedMode = modes[0];
 
   let wheelRotation = 0;
 
   $: {
-    const diff = activeMode.angle - wheelRotation;
+    const diff = selectedMode.angle - wheelRotation;
     wheelRotation += (((diff % 360) + 540) % 360) - 180;
   }
 </script>
@@ -46,9 +66,9 @@
   {#each modes as mode, i}
     <g
       class="mode"
-      class:active={mode === activeMode}
+      class:selected={mode === selectedMode}
       transform="rotate({mode.rotation})"
-      on:click={() => (activeMode = mode)}
+      on:click={() => selectMode(mode, i)}
     >
       <path d={mode.path} transform="rotate(-90)" />
       <text
@@ -79,12 +99,12 @@
     stroke: var(--color-border);
   }
 
-  .mode:not(.active) {
-    cursor: pointer;
+  .mode.selected {
+    cursor: default;
   }
 
-  .mode.active {
-    cursor: default;
+  .mode:not(.selected) {
+    cursor: pointer;
   }
 
   .mode path {
@@ -92,11 +112,11 @@
     stroke: var(--color-border);
   }
 
-  .mode:not(.active):hover path {
-    fill: var(--green-400);
+  .mode:hover path {
+    fill: var(--color-hover);
   }
 
-  .mode:not(.active):active path {
+  .mode:active path {
     fill: var(--color-active);
   }
 
@@ -107,5 +127,13 @@
   .mode circle {
     fill: var(--blue-400);
     stroke: var(--color-border);
+  }
+
+  .mode.selected path {
+    fill: var(--green-400);
+  }
+
+  .mode.selected text {
+    fill: var(--color-white-key);
   }
 </style>

@@ -1,8 +1,26 @@
-<script lang="ts">
-  import type { ModeDef } from "@/music/modes";
+<script context="module" lang="ts">
+  import { Sampler } from "@/music/sampler";
+  import { writable } from "svelte/store";
 
+  let sampler: Sampler;
+  const samplerState = writable("unloaded");
+
+  const notes = [
+    "F2 Gb2 G2 Ab2 A2 Bb2 B2 C3 Db3 D3 Eb3 E3",
+    "F3 Gb3 G3 Ab3 A3 Bb3 B3 C4 Db4 D4 Eb4 E4",
+  ]
+    .join(" ")
+    .split(" ");
+</script>
+
+<script lang="ts">
+  import { Library } from "@/music/library";
   import MelodicMajorModeWheel from "./MelodicMajorModeWheel.svelte";
+  import type { ModeDef } from "@/music/modes";
   import PianoWheel from "./PianoWheel.svelte";
+  import PlayButton from "./PlayButton.svelte";
+  import { config } from "@/config";
+  import { onMount } from "svelte";
 
   export let modeDefs: ModeDef[];
 
@@ -10,16 +28,66 @@
   const height = 256;
   const keyOuterRadius = (Math.min(width, height) * 3) / 8;
   const modeOuterRadius = (Math.min(width, height) * 15) / 32;
+
+  let activeKey: string = "C";
+  let activeModeIndex: number = 0;
+
+  async function loadInstrument() {
+    const library = await Library.load(config.instruments.libraryUrl);
+    const sampler = new Sampler(library);
+    await sampler.load(config.instruments.default);
+    return sampler;
+  }
+
+  function playScale() {
+    const length = 0.25;
+    const rotated = [
+      ...modeDefs.slice(activeModeIndex),
+      ...modeDefs.slice(0, activeModeIndex),
+    ];
+    const offset = rotated[0].semitones;
+    let semitones = rotated.map(
+      ({ semitones }) => (semitones + 12 - offset) % 12
+    );
+    semitones = [...semitones, 12, ...semitones.reverse()];
+    const keyIndex = notes.findIndex((note) => note.slice(0, -1) === activeKey);
+    const pattern = semitones.map((semitones, i) => ({
+      note: notes[keyIndex + semitones],
+      delay: i === 0 ? 0 : length,
+    }));
+    sampler.playPattern(pattern);
+  }
+
+  $: samplerIsLoading = $samplerState !== "loaded";
+
+  onMount(async () => {
+    if ($samplerState === "unloaded") {
+      samplerState.set("loading");
+      sampler = await loadInstrument();
+      samplerState.set("loaded");
+    }
+  });
 </script>
 
 <svg viewBox="0 0 {width} {height}">
-  <g transform="translate({width / 2}, {height / 2}) rotate(-15)">
-    <PianoWheel radius={keyOuterRadius} />
-    <MelodicMajorModeWheel
-      outerRadius={modeOuterRadius}
-      innerRadius={keyOuterRadius}
-      {modeDefs}
+  <g transform="translate({width / 2}, {height / 2})">
+    <PlayButton
+      radius={keyOuterRadius / 6}
+      state="stopped"
+      on:click={playScale}
     />
+    <g transform="rotate(-15)">
+      <PianoWheel
+        radius={keyOuterRadius}
+        on:keyChanged={({ detail }) => (activeKey = detail)}
+      />
+      <MelodicMajorModeWheel
+        outerRadius={modeOuterRadius}
+        innerRadius={keyOuterRadius}
+        {modeDefs}
+        on:modeChanged={({ detail }) => (activeModeIndex = detail)}
+      />
+    </g>
   </g>
 </svg>
 

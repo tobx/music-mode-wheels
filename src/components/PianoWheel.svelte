@@ -1,59 +1,72 @@
 <script lang="ts">
   import { circlePathDef, ringArcPathDef } from "@/utilities/svg";
 
+  import { createEventDispatcher } from "svelte";
+
   export let radius: number;
+
+  const dispatch = createEventDispatcher<{ keyChanged: string }>();
 
   const blackKeyInnerRadius = (2 / 3) * radius;
   const whiteKeyInnerRadius = radius / 2;
   const keyTextRadius = (radius + blackKeyInnerRadius) / 2 - 1;
 
-  function createKey(
-    type: "black" | "white",
-    name: string,
-    rotation: number,
-    keyAngle: number = 30,
-    textAngle: number = 15
-  ) {
-    const isWhite = type === "white";
-    const innerRadius = isWhite ? whiteKeyInnerRadius : blackKeyInnerRadius;
-    return {
-      type,
-      name,
-      rotation,
-      textAngle,
-      path: ringArcPathDef(innerRadius, radius, keyAngle),
-      get angle() {
-        return 15 - rotation - textAngle;
-      },
-      isWhite,
-    };
+  class Key {
+    public path: string;
+
+    constructor(
+      public type: "black" | "white",
+      public name: string,
+      public displayName: string,
+      public rotation: number,
+      public keyAngle: number = 30,
+      public textAngle: number = 15
+    ) {
+      const innerRadius = this.isWhite
+        ? whiteKeyInnerRadius
+        : blackKeyInnerRadius;
+      this.path = ringArcPathDef(innerRadius, radius, keyAngle);
+    }
+
+    get angle() {
+      return 15 - this.rotation - this.textAngle;
+    }
+
+    get isWhite() {
+      return this.type === "white";
+    }
+  }
+
+  function selectKey(key: Key) {
+    selectedKey = key;
+    dispatch("keyChanged", key.name);
   }
 
   const keys = [
-    createKey("white", "C", 0, 45, 15),
-    createKey("black", "C♯ / D♭", 30),
-    createKey("white", "D", 45, 60, 30),
-    createKey("black", "D♯ / E♭", 90),
-    createKey("white", "E", 105, 45, 30),
-    createKey("white", "F", 150, 45, 15),
-    createKey("black", "F♯ / G♭", 180),
-    createKey("white", "G", 195, 60, 30),
-    createKey("black", "G♯ / A♭", 240),
-    createKey("white", "A", 255, 60, 30),
-    createKey("black", "A♯ / B♭", 300),
-    createKey("white", "B", 315, 45, 30),
+    new Key("white", "C", "C", 0, 45, 15),
+    new Key("black", "Db", "C♯ / D♭", 30),
+    new Key("white", "D", "D", 45, 60, 30),
+    new Key("black", "Eb", "D♯ / E♭", 90),
+    new Key("white", "E", "E", 105, 45, 30),
+    new Key("white", "F", "F", 150, 45, 15),
+    new Key("black", "Gb", "F♯ / G♭", 180),
+    new Key("white", "G", "G", 195, 60, 30),
+    new Key("black", "Ab", "G♯ / A♭", 240),
+    new Key("white", "A", "A", 255, 60, 30),
+    new Key("black", "Bb", "A♯ / B♭", 300),
+    new Key("white", "B", "B", 315, 45, 30),
   ];
 
   const blackKeys = keys.filter((key) => !key.isWhite);
 
   const whiteKeys = keys.filter((key) => key.isWhite);
 
-  let activeKey = keys[0];
+  let selectedKey = keys[0];
 
   let wheelRotation = 0;
 
   $: {
-    const diff = activeKey.angle - wheelRotation;
+    const diff = selectedKey.angle - wheelRotation;
     wheelRotation += (((diff % 360) + 540) % 360) - 180;
   }
 </script>
@@ -66,9 +79,9 @@
   {#each whiteKeys.concat(blackKeys) as key}
     <g
       class="key {key.type}"
-      class:active={key === activeKey}
+      class:selected={key === selectedKey}
       transform="rotate({key.rotation})"
-      on:click={() => (activeKey = key)}
+      on:click={() => selectKey(key)}
     >
       <path d={key.path} transform="rotate(-90)" />
       <text dominant-baseline="middle" transform="rotate({key.textAngle})">
@@ -78,7 +91,7 @@
           alignment-baseline="middle"
           xlink:href="#key-text-circle"
         >
-          {key.name}
+          {key.displayName}
         </textPath>
       </text>
     </g>
@@ -86,11 +99,11 @@
 </g>
 
 <style>
-  .key:not(.active) {
+  .key:not(.selected) {
     cursor: pointer;
   }
 
-  .key.active {
+  .key.selected {
     cursor: default;
   }
 
@@ -119,15 +132,23 @@
     font-weight: 400;
   }
 
-  .key:not(.active):hover path {
+  .key:hover path {
     fill: var(--color-hover);
   }
 
-  .key:not(.active):hover text {
+  .key:hover text {
     fill: var(--color-black-key);
   }
 
-  .key:not(.active):active path {
+  .key:active path {
     fill: var(--color-active);
+  }
+
+  .key.selected path {
+    fill: var(--green-400);
+  }
+
+  .key.selected text {
+    fill: var(--color-white-key);
   }
 </style>
