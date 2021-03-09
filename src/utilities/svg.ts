@@ -9,8 +9,8 @@ export function circlePathDef(radius: number) {
 }
 
 export function ringArcPathDef(
-  innerRadius: number,
   outerRadius: number,
+  innerRadius: number,
   angle: number
 ) {
   const radians = angle * degToRad;

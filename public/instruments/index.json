@@ -2,5 +2,9 @@
   "Piano": {
     "60": "piano/500ms",
     "120": "piano/250ms"
+  },
+  "Vibraphone": {
+    "60": "vibraphone/500ms",
+    "120": "vibraphone/250ms"
   }
 }

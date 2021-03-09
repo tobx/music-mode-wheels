@@ -20,7 +20,7 @@
     public path: string;
 
     constructor(public def: ModeDef) {
-      this.path = ringArcPathDef(innerRadius, outerRadius, 30);
+      this.path = ringArcPathDef(outerRadius, innerRadius, 30);
     }
 
     get angle() {

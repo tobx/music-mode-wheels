@@ -19,21 +19,29 @@ export class Sampler {
     }
   }
 
-  playNote(note: string, when?: number, offset?: number, duration?: number) {
+  async playNote(
+    note: string,
+    when?: number,
+    offset?: number,
+    duration?: number
+  ) {
     const buffer = this.buffers[note];
     if (buffer === undefined) {
       throw new Error("Buffer '" + note + "' not found.");
     }
-    if (buffer !== undefined) {
-      this.player.play(buffer, when, offset, duration);
-    }
+    await this.player.play(buffer, when, offset, duration);
   }
 
-  playPattern(pattern: NotePattern, offset: number = 0.01) {
-    let when = this.player.currentTime + offset;
-    for (const { note, delay } of pattern) {
+  async playPattern(pattern: NotePattern, latency = 0.01) {
+    let when = this.player.currentTime + latency;
+    const playbacks = pattern.map(async ({ note, delay }) => {
       when += delay;
-      this.playNote(note, when);
-    }
+      await this.playNote(note, when);
+    });
+    await Promise.all(playbacks);
+  }
+
+  async stop() {
+    await this.player.stop();
   }
 }

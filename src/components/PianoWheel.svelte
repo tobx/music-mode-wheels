@@ -25,7 +25,7 @@
       const innerRadius = this.isWhite
         ? whiteKeyInnerRadius
         : blackKeyInnerRadius;
-      this.path = ringArcPathDef(innerRadius, radius, keyAngle);
+      this.path = ringArcPathDef(radius, innerRadius, keyAngle);
     }
 
     get angle() {

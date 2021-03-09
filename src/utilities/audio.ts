@@ -20,17 +20,58 @@ export class Decoder {
   }
 }
 
+export async function ended(source: AudioBufferSourceNode) {
+  await new Promise((resolve) => source.addEventListener("ended", resolve));
+}
+
 export class Player {
   private context = createAudioContext();
+
+  private gainNode: GainNode;
+
+  private sources: Set<AudioBufferSourceNode> = new Set();
+
+  constructor() {
+    this.gainNode = this.createGain();
+  }
 
   get currentTime() {
     return this.context.currentTime;
   }
 
-  play(buffer: AudioBuffer, when?: number, offset?: number, duration?: number) {
+  createGain() {
+    const gainNode = this.context.createGain();
+    gainNode.connect(this.context.destination);
+    return gainNode;
+  }
+
+  // fade out to prevent clicking
+  async stop(fadeDuration = 0.04, fadeToDecibel = -96, latency = 0.01) {
+    const startTime = this.context.currentTime + latency;
+    const stopTime = startTime + fadeDuration;
+    const timeConstant = (fadeDuration * 20) / (fadeToDecibel * -Math.log(10));
+    this.gainNode.gain.setTargetAtTime(0, startTime, timeConstant);
+    this.gainNode = this.createGain();
+    const playback = [...this.sources].map(async (source) => {
+      source.stop(stopTime);
+      await ended(source);
+    });
+    await Promise.all(playback);
+  }
+
+  async play(
+    buffer: AudioBuffer,
+    when?: number,
+    offset?: number,
+    duration?: number
+  ) {
     const source = this.context.createBufferSource();
-    source.connect(this.context.destination);
     source.buffer = buffer;
+    source.connect(this.gainNode);
+    this.sources.add(source);
     source.start(when, offset, duration);
+    await ended(source);
+    this.sources.delete(source);
+    source.disconnect();
   }
 }

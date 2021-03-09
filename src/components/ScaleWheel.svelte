@@ -1,13 +1,16 @@
 <script context="module" lang="ts">
   import { Sampler } from "@/music/sampler";
+  import type { Writable } from "svelte/store";
   import { writable } from "svelte/store";
 
   let sampler: Sampler;
-  const samplerState = writable("unloaded");
+  const samplerState: Writable<"initial" | "loading" | "loaded"> = writable(
+    "initial"
+  );
 
   const notes = [
-    "F2 Gb2 G2 Ab2 A2 Bb2 B2 C3 Db3 D3 Eb3 E3",
-    "F3 Gb3 G3 Ab3 A3 Bb3 B3 C4 Db4 D4 Eb4 E4",
+    "G2 Ab2 A2 Bb2 B2 C3 Db3 D3 Eb3 E3 F3 Gb3",
+    "G3 Ab3 A3 Bb3 B3 C4 Db4 D4 Eb4 E4 F4 Gb4",
   ]
     .join(" ")
     .split(" ");
@@ -19,6 +22,7 @@
   import type { ModeDef } from "@/music/modes";
   import PianoWheel from "./PianoWheel.svelte";
   import PlayButton from "./PlayButton.svelte";
+  import type { PlayButtonState } from "./types";
   import { config } from "@/config";
   import { onMount } from "svelte";
 
@@ -32,6 +36,19 @@
   let activeKey: string = "C";
   let activeModeIndex: number = 0;
 
+  let isPlaying = false;
+  let playButtonState: PlayButtonState;
+
+  async function handlePlayButtonClick() {
+    if (samplerIsLoading) {
+      return;
+    }
+    sampler.stop();
+    if (!isPlaying) {
+      playScale();
+    }
+  }
+
   async function loadInstrument() {
     const library = await Library.load(config.instruments.libraryUrl);
     const sampler = new Sampler(library);
@@ -39,7 +56,7 @@
     return sampler;
   }
 
-  function playScale() {
+  async function playScale() {
     const length = 0.25;
     const rotated = [
       ...modeDefs.slice(activeModeIndex),
@@ -55,13 +72,23 @@
       note: notes[keyIndex + semitones],
       delay: i === 0 ? 0 : length,
     }));
-    sampler.playPattern(pattern);
+    isPlaying = true;
+    await sampler.playPattern(pattern);
+    isPlaying = false;
   }
 
   $: samplerIsLoading = $samplerState !== "loaded";
 
+  $: {
+    playButtonState = samplerIsLoading
+      ? "loading"
+      : isPlaying
+      ? "playing"
+      : "stopped";
+  }
+
   onMount(async () => {
-    if ($samplerState === "unloaded") {
+    if ($samplerState === "initial") {
       samplerState.set("loading");
       sampler = await loadInstrument();
       samplerState.set("loaded");
@@ -73,8 +100,8 @@
   <g transform="translate({width / 2}, {height / 2})">
     <PlayButton
       radius={keyOuterRadius / 6}
-      state="stopped"
-      on:click={playScale}
+      state={playButtonState}
+      on:click={handlePlayButtonClick}
     />
     <g transform="rotate(-15)">
       <PianoWheel
