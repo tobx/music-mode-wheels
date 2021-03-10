@@ -145,7 +145,7 @@
   }
 
   .key.selected path {
-    fill: var(--green-400);
+    fill: var(--color-primary);
   }
 
   .key.selected text {

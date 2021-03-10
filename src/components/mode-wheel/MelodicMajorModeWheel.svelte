@@ -130,7 +130,7 @@
   }
 
   .mode.selected path {
-    fill: var(--green-400);
+    fill: var(--color-primary);
   }
 
   .mode.selected text {
