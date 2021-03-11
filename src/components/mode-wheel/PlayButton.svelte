@@ -47,7 +47,7 @@
     }
   }
 
-  .button {
+  .button:not(.loading) {
     cursor: pointer;
   }
 
@@ -56,11 +56,11 @@
     fill: var(--white);
   }
 
-  .button:hover circle {
+  .button:not(.loading):hover circle {
     fill: var(--color-hover);
   }
 
-  .button:active circle {
+  .button:not(.loading):active circle {
     fill: var(--red-500);
   }
 

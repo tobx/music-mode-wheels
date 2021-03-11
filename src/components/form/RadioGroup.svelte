@@ -1,17 +1,18 @@
 <script lang="ts">
   import type { RadioGroupOption } from "./types";
 
-  export let group: string;
+  export let group: string | number;
 
   export let options: RadioGroupOption[] = [];
 </script>
 
 <div class="group">
-  {#each options as { label, value }}
-    <label>
+  {#each options as { label, value, disabled }}
+    <label class:disabled>
       <input
         type="radio"
         bind:group
+        {disabled}
         {value}
         on:click={(event) => event.currentTarget.focus()}
       />
@@ -34,6 +35,11 @@
     margin: 0.25em 0;
   }
 
+  label.disabled {
+    color: var(--color-disabled);
+    cursor: not-allowed;
+  }
+
   input {
     appearance: none;
     background-color: var(--white);
@@ -50,15 +56,19 @@
     height: 1em;
   }
 
-  input:hover {
+  input:not(:checked, :disabled):hover {
     border-color: var(--color-border-hover);
-  }
-
-  input:focus {
-    box-shadow: 0 0 0 calc(1em * 3 / 16) var(--color-primary-outline);
   }
 
   input:checked {
     border: calc(1em / 3) solid var(--color-primary);
+  }
+
+  input:disabled {
+    border-color: var(--color-border-disabled);
+  }
+
+  input:focus {
+    box-shadow: 0 0 0 calc(1em * 3 / 16) var(--color-primary-outline);
   }
 </style>

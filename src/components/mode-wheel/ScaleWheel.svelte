@@ -1,12 +1,14 @@
-<script context="module" lang="ts">
-  import { Sampler } from "@/music/sampler";
-  import type { Writable } from "svelte/store";
-  import { writable } from "svelte/store";
+<script lang="ts">
+  import { controller, state, tempo } from "@/stores/sampler";
 
-  let sampler: Sampler;
-  const samplerState: Writable<"initial" | "loading" | "loaded"> = writable(
-    "initial"
-  );
+  import MelodicMajorModeWheel from "./MelodicMajorModeWheel.svelte";
+  import type { ModeDef } from "@/music/modes";
+  import PianoWheel from "./PianoWheel.svelte";
+  import PlayButton from "./PlayButton.svelte";
+  import type { PlayButtonState } from "./types";
+  import { onMount } from "svelte";
+
+  export let modeDefs: ModeDef[];
 
   const notes = [
     "G2 Ab2 A2 Bb2 B2 C3 Db3 D3 Eb3 E3 F3 Gb3",
@@ -14,19 +16,6 @@
   ]
     .join(" ")
     .split(" ");
-</script>
-
-<script lang="ts">
-  import { Library } from "@/music/library";
-  import MelodicMajorModeWheel from "./MelodicMajorModeWheel.svelte";
-  import type { ModeDef } from "@/music/modes";
-  import PianoWheel from "./PianoWheel.svelte";
-  import PlayButton from "./PlayButton.svelte";
-  import type { PlayButtonState } from "./types";
-  import { config } from "@/config";
-  import { onMount } from "svelte";
-
-  export let modeDefs: ModeDef[];
 
   const width = 256;
   const height = 256;
@@ -40,24 +29,16 @@
   let playButtonState: PlayButtonState;
 
   async function handlePlayButtonClick() {
-    if (samplerIsLoading) {
-      return;
+    if ($state === "loaded") {
+      controller.stop();
+      if (!isPlaying) {
+        playScale();
+      }
     }
-    sampler.stop();
-    if (!isPlaying) {
-      playScale();
-    }
-  }
-
-  async function loadInstrument() {
-    const library = await Library.load(config.instruments.libraryUrl);
-    const sampler = new Sampler(library);
-    await sampler.load(config.instruments.default);
-    return sampler;
   }
 
   async function playScale() {
-    const length = 0.25;
+    const length = 60 / $tempo / 2;
     const rotated = [
       ...modeDefs.slice(activeModeIndex),
       ...modeDefs.slice(0, activeModeIndex),
@@ -73,26 +54,17 @@
       delay: i === 0 ? 0 : length,
     }));
     isPlaying = true;
-    await sampler.playPattern(pattern);
+    await controller.play(pattern);
     isPlaying = false;
   }
 
-  $: samplerIsLoading = $samplerState !== "loaded";
-
   $: {
-    playButtonState = samplerIsLoading
-      ? "loading"
-      : isPlaying
-      ? "playing"
-      : "stopped";
+    playButtonState =
+      $state !== "loaded" ? "loading" : isPlaying ? "playing" : "stopped";
   }
 
-  onMount(async () => {
-    if ($samplerState === "initial") {
-      samplerState.set("loading");
-      sampler = await loadInstrument();
-      samplerState.set("loaded");
-    }
+  onMount(() => {
+    //
   });
 </script>
 

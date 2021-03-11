@@ -1,10 +1,27 @@
 import { Decoder } from "@/utilities/audio";
 import { joinPaths } from "@/utilities/path";
 
-type Index = {
-  [name: string]: {
-    [tempo: string]: string;
-  };
+export type Instrument = {
+  id: string;
+  name: string;
+  tempi: number[];
+};
+
+export type InstrumentPreset = {
+  id: string;
+  tempo: number;
+};
+
+type LibraryIndexEntry = {
+  name: string;
+  presets: {
+    tempo: number;
+    path: string;
+  }[];
+};
+
+export type LibraryIndex = {
+  [id: string]: LibraryIndexEntry;
 };
 
 type SampleIndex = {
@@ -12,18 +29,37 @@ type SampleIndex = {
   bytes: number;
 }[];
 
-export type Instrument = {
-  name: string;
-  tempo: string;
-};
-
 export class Library {
   private decoder = new Decoder();
 
-  constructor(private url: string, public index: Index) {}
+  constructor(private url: string, private index: LibraryIndex) {}
 
-  async loadSamples({ name, tempo }: Instrument) {
-    const url = joinPaths(this.url, this.index[name][tempo]);
+  getUrl({ id, tempo }: InstrumentPreset) {
+    const samples = this.index[id]?.presets.find(({ tempo: t }) => t === tempo);
+    if (samples === undefined) {
+      const message = `Cannot find tempo '${tempo}' for instrument id '${id}'.`;
+      throw new Error(message);
+    }
+    return joinPaths(this.url, samples.path);
+  }
+
+  get instruments(): Instrument[] {
+    return Object.keys(this.index).map((id) => this.getInstrument(id)!);
+  }
+
+  hasPreset({ id, tempo }: InstrumentPreset) {
+    return this.getInstrument(id)?.tempi.includes(tempo);
+  }
+
+  getInstrument(id: string): Instrument | undefined {
+    if (this.index.hasOwnProperty(id)) {
+      const { name, presets } = this.index[id];
+      return { id, name, tempi: presets.map((s) => s.tempo) };
+    }
+  }
+
+  async loadSamples(instrument: InstrumentPreset) {
+    const url = this.getUrl(instrument);
     const [index, samples] = await Promise.all([
       this.loadSampleIndex(url),
       this.loadSampleFile(url),
@@ -46,11 +82,5 @@ export class Library {
   async loadSampleFile(url: string) {
     const response = await fetch(joinPaths(url, "samples.bin"));
     return response.arrayBuffer();
-  }
-
-  static async load(url: string) {
-    const response = await fetch(joinPaths(url, "index.json"));
-    const index: Index = await response.json();
-    return new Library(url, index);
   }
 }

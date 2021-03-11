@@ -1,4 +1,4 @@
-import type { Instrument, Library } from "./library";
+import type { InstrumentPreset, Library } from "./library";
 
 import { Player } from "@/utilities/audio";
 
@@ -9,10 +9,10 @@ export class Sampler {
 
   private buffers: { [note: string]: AudioBuffer } = {};
 
-  constructor(private library: Library) {}
+  constructor(private library: Library, private latency = 0.01) {}
 
-  async load(instrument: Instrument) {
-    this.buffers = {};
+  async load(instrument: InstrumentPreset) {
+    await this.unload();
     const samples = await this.library.loadSamples(instrument);
     for (const { note, buffer } of samples) {
       this.buffers[note] = buffer;
@@ -26,14 +26,13 @@ export class Sampler {
     duration?: number
   ) {
     const buffer = this.buffers[note];
-    if (buffer === undefined) {
-      throw new Error("Buffer '" + note + "' not found.");
+    if (buffer !== undefined) {
+      await this.player.play(buffer, when, offset, duration);
     }
-    await this.player.play(buffer, when, offset, duration);
   }
 
-  async playPattern(pattern: NotePattern, latency = 0.01) {
-    let when = this.player.currentTime + latency;
+  async playPattern(pattern: NotePattern) {
+    let when = this.player.currentTime + this.latency;
     const playbacks = pattern.map(async ({ note, delay }) => {
       when += delay;
       await this.playNote(note, when);
@@ -43,5 +42,10 @@ export class Sampler {
 
   async stop() {
     await this.player.stop();
+  }
+
+  async unload() {
+    this.buffers = {};
+    await this.stop();
   }
 }

@@ -1,6 +1,7 @@
 import autoprefixer from "autoprefixer";
 import commonjs from "@rollup/plugin-commonjs";
 import css from "rollup-plugin-css-only";
+import json from "@rollup/plugin-json";
 import livereload from "rollup-plugin-livereload";
 import resolve from "@rollup/plugin-node-resolve";
 import svelte from "rollup-plugin-svelte";
@@ -74,6 +75,9 @@ export default {
       sourceMap: !production,
       inlineSources: !production,
     }),
+
+    // Convert .json files to ES6 modules
+    json(),
 
     // In dev mode, call `npm run start` once
     // the bundle has been generated

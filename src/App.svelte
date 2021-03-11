@@ -33,7 +33,9 @@
 
     --color-active: var(--red-500);
     --color-border: var(--gray-300);
+    --color-border-disabled: var(--gray-200);
     --color-border-hover: var(--gray-400);
+    --color-disabled: var(--gray-400);
     --color-hover: var(--yellow-300);
     --color-link: var(--blue-500);
     --color-primary: rgb(var(--green-400-rgb));

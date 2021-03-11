@@ -1,4 +1,5 @@
 export type RadioGroupOption = {
-  value: string;
+  value: string | number;
   label: string;
+  disabled?: boolean;
 };

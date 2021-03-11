@@ -1,36 +1,31 @@
 <script lang="ts">
   import RadioGroup from "../form/RadioGroup.svelte";
+  import { library, instrumentId, tempo } from "@/stores/sampler";
 
-  const instrumentOptions = [
-    { value: "piano", label: "Piano" },
-    { value: "vibraphone", label: "Vibraphone" },
-  ];
+  const instrumentOptions = library.instruments.map(({ id, name }) => ({
+    value: id,
+    label: name,
+  }));
 
-  const tempoOptions = [
-    { value: "60", label: "60 BPM" },
-    { value: "120", label: "120 BPM" },
-  ];
-
-  let instrument = "piano";
-  let tempo = "120";
-
-  $: {
-    console.log(instrument);
-  }
-
-  $: {
-    console.log(tempo);
-  }
+  $: tempoOptions = (() => {
+    const tempoArrays = library.instruments.map(({ tempi }) => tempi);
+    const tempi = ([] as number[]).concat(...tempoArrays);
+    return [...new Set(tempi)].map((tempo) => ({
+      value: tempo,
+      label: tempo + " BPM",
+      disabled: !library.hasPreset({ id: $instrumentId, tempo }),
+    }));
+  })();
 </script>
 
 <div class="options">
   <div class="group">
-    <p class="name">Instruments:</p>
-    <RadioGroup bind:group={instrument} options={instrumentOptions} />
+    <p class="name">Instrument:</p>
+    <RadioGroup bind:group={$instrumentId} options={instrumentOptions} />
   </div>
   <div class="group">
     <p class="name">Tempo:</p>
-    <RadioGroup bind:group={tempo} options={tempoOptions} />
+    <RadioGroup bind:group={$tempo} options={tempoOptions} />
   </div>
 </div>
 

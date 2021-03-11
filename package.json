@@ -1,6 +1,6 @@
 {
   "name": "music-mode-wheels",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "A website that displays music modes as interactive wheels.",
   "scripts": {
     "build": "rollup -c",
@@ -29,6 +29,7 @@
   "homepage": "https://github.com/tobx/music-mode-wheels#readme",
   "devDependencies": {
     "@rollup/plugin-commonjs": "^17.0.0",
+    "@rollup/plugin-json": "^4.1.0",
     "@rollup/plugin-node-resolve": "^11.0.0",
     "@rollup/plugin-typescript": "^8.0.0",
     "@tsconfig/svelte": "^1.0.0",
