@@ -1,5 +1,5 @@
 <script lang="ts">
-  import ScaleWheel from "../mode-wheel/ScaleWheel.svelte";
+  import ScaleWheel from "../scale-wheel/Index.svelte";
   import PlaybackOptions from "../settings/PlaybackOptions.svelte";
   import { modeDefs } from "@/music/modes";
 

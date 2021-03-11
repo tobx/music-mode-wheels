@@ -32,7 +32,7 @@
     : getPlayPathDef)(pathRadius);
 </script>
 
-<g class="button {state}" on:click>
+<g class={state} on:click>
   <circle cx="0" cy="0" r={radius} fill="white" stroke="black" />
   <path d={pathDef} />
 </g>
@@ -47,7 +47,7 @@
     }
   }
 
-  .button:not(.loading) {
+  g:not(.loading) {
     cursor: pointer;
   }
 
@@ -56,12 +56,14 @@
     fill: var(--white);
   }
 
-  .button:not(.loading):hover circle {
-    fill: var(--color-hover);
+  @media (hover: hover) {
+    g:not(.loading):hover circle {
+      fill: var(--color-hover);
+    }
   }
 
-  .button:not(.loading):active circle {
-    fill: var(--red-500);
+  g:not(.loading):active circle {
+    fill: var(--color-active);
   }
 
   path {
@@ -69,8 +71,12 @@
     transform: rotate(0);
   }
 
-  .loading path {
+  g.loading path {
     animation: rotation 1s linear infinite;
     fill: var(--color-border);
+  }
+
+  g.playing circle {
+    fill: var(--color-hover);
   }
 </style>

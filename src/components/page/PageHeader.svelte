@@ -29,7 +29,7 @@
   }
 
   .icon {
-    color: var(--gray-400);
+    color: var(--color-text-dimmed);
     display: block;
     width: 1.5em;
     height: 1.5em;
@@ -45,7 +45,7 @@
 
   .center {
     --margin: 0.375em;
-    color: var(--gray-400);
+    color: var(--color-text-dimmed);
     display: flex;
     flex-wrap: wrap;
     margin: 0 calc(-1 * var(--margin));

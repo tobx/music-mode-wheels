@@ -1,7 +1,7 @@
 <script lang="ts">
   import { controller, state, tempo } from "@/stores/sampler";
 
-  import MelodicMajorModeWheel from "./MelodicMajorModeWheel.svelte";
+  import ModeWheel from "./ModeWheel.svelte";
   import type { ModeDef } from "@/music/modes";
   import PianoWheel from "./PianoWheel.svelte";
   import PlayButton from "./PlayButton.svelte";
@@ -80,7 +80,7 @@
         radius={keyOuterRadius}
         on:keyChanged={({ detail }) => (activeKey = detail)}
       />
-      <MelodicMajorModeWheel
+      <ModeWheel
         outerRadius={modeOuterRadius}
         innerRadius={keyOuterRadius}
         {modeDefs}
@@ -92,7 +92,7 @@
 
 <style>
   svg {
-    --color-black-key: var(--gray-700);
+    --color-black-key: var(--color-text);
     --color-white-key: var(--white);
 
     stroke-width: 0.67;

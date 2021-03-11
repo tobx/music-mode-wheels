@@ -34,9 +34,9 @@
     display: flex;
     flex-wrap: wrap;
     flex-flow: row wrap;
+    justify-content: center;
     margin: -0.5em;
     margin-bottom: 1em;
-    justify-content: center;
   }
 
   .group {

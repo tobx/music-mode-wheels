@@ -38,9 +38,11 @@
     --color-disabled: var(--gray-400);
     --color-hover: var(--yellow-300);
     --color-link: var(--blue-500);
-    --color-primary: rgb(var(--green-400-rgb));
+    --color-primary-rgb: var(--green-400-rgb);
+    --color-primary: rgb(var(--color-primary-rgb));
     --color-primary-outline: rgba(var(--green-400-rgb), 0.375);
     --color-text: var(--gray-700);
+    --color-text-dimmed: var(--gray-400);
 
     background-color: var(--gray-100);
     color: var(--color-text);
