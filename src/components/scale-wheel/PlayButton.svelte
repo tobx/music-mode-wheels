@@ -1,40 +1,22 @@
 <script lang="ts">
-  import { ringArcPathDef } from "@/utilities/svg";
-
   import type { PlayButtonState } from "./types";
+  import PlayStopPath from "./PlayStopPath.svelte";
+  import { ringArcPathDef } from "@/utilities/svg";
 
   export let radius: number;
 
   export let state: PlayButtonState;
 
-  const pathRadius = radius / 2;
-
-  function getLoadPathDef(radius: number) {
-    return ringArcPathDef(radius * 2, radius * 1.75, 180);
-  }
-
-  function getPlayPathDef(radius: number) {
-    const angle = (Math.PI * 2) / 3;
-    const x = Math.cos(angle) * radius;
-    const y = Math.sin(angle) * radius;
-    return `M ${x} ${y} L ${radius} 0 L ${x} ${-y} Z`;
-  }
-
-  function getStopPathDef(radius: number) {
-    const l = Math.sin(Math.PI / 4) * radius;
-    return `M -${l} ${l} L ${l} ${l} L ${l} ${-l} L ${-l} ${-l} Z`;
-  }
-
-  $: pathDef = (state === "loading"
-    ? getLoadPathDef
-    : state === "playing"
-    ? getStopPathDef
-    : getPlayPathDef)(pathRadius);
+  let loadPathDefinition = ringArcPathDef(radius, radius * 0.875, 180);
 </script>
 
 <g class={state} on:click>
   <circle cx="0" cy="0" r={radius} fill="white" stroke="black" />
-  <path d={pathDef} />
+  {#if state === "loading"}
+    <path d={loadPathDefinition} />
+  {:else}
+    <PlayStopPath radius={radius / 2 - 1} {state} />
+  {/if}
 </g>
 
 <style>
@@ -52,12 +34,12 @@
   }
 
   circle {
-    stroke: var(--color-border);
     fill: var(--white);
+    stroke: var(--color-border);
   }
 
   @media (hover: hover) {
-    g:not(.loading):hover circle {
+    g:not(.loading, .playing):hover circle {
       fill: var(--color-hover);
     }
   }
@@ -66,17 +48,13 @@
     fill: var(--color-active);
   }
 
-  path {
-    fill: var(--color-black-key);
-    transform: rotate(0);
-  }
-
-  g.loading path {
-    animation: rotation 1s linear infinite;
-    fill: var(--color-border);
-  }
-
   g.playing circle {
     fill: var(--color-hover);
+  }
+
+  path {
+    animation: rotation 1s linear infinite;
+    fill: var(--color-border);
+    stroke: none;
   }
 </style>

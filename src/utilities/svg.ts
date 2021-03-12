@@ -1,3 +1,6 @@
+import { AnimationLoop } from "./animation";
+import { linear } from "./easing";
+
 const degToRad = Math.PI / 180;
 
 export function circlePathDef(radius: number) {
@@ -25,4 +28,71 @@ export function ringArcPathDef(
     `A ${innerRadius} ${innerRadius} 0 0 0 ${innerRadius} 0`,
     `Z`,
   ].join(" ");
+}
+
+export class PathMorpher {
+  private parts: string[];
+
+  constructor(
+    template: string,
+    private from: number[],
+    private to: number[],
+    placeholder = "%"
+  ) {
+    this.parts = template.split(placeholder);
+    if (from.length !== to.length) {
+      throw new Error("'from' length ≠ 'to' length");
+    }
+    if (from.length + 1 !== this.parts.length) {
+      throw new Error("placeholder count ≠ values count");
+    }
+  }
+
+  morph(fraction: number) {
+    return this.parts.reduce((path, part, i) => {
+      const index = i - 1;
+      const from = this.from[index];
+      const to = this.to[index];
+      const interpolated = from + fraction * (to - from);
+      return path + interpolated + part;
+    });
+  }
+}
+
+export class PathMorphAnimator {
+  public ease = linear;
+
+  private loop = new AnimationLoop();
+
+  private position = 0;
+
+  constructor(
+    private morpher: PathMorpher,
+    private duration: number,
+    private update: (pathDef: string) => void
+  ) {}
+
+  animate(to: number) {
+    const from = this.position;
+    const displacement = to - this.position;
+    const duration = Math.abs(displacement) * this.duration;
+    this.loop.update = (fraction) => {
+      this.position = from + this.ease(fraction) * displacement;
+      this.triggerUpdate();
+    };
+    this.loop.start(duration);
+  }
+
+  set(position: number) {
+    this.position = position;
+    this.triggerUpdate();
+  }
+
+  triggerUpdate() {
+    this.update(this.morpher.morph(this.position));
+  }
+
+  stop() {
+    this.loop.stop();
+  }
 }

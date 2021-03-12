@@ -26,11 +26,7 @@
     display: flex;
     flex-direction: column;
     padding: 0.25em 0;
-
     -webkit-tap-highlight-color: rgba(var(--color-primary-rgb), 0.25);
-    -moz-tap-highlight-color: rgba(var(--color-primary-rgb), 0.25);
-    -o-tap-highlight-color: rgba(var(--color-primary-rgb), 0.25);
-    tap-highlight-color: rgba(var(--color-primary-rgb), 0.25);
   }
 
   label {
@@ -60,11 +56,7 @@
     transition: box-shadow 100ms ease-in;
     width: 1em;
     height: 1em;
-
     -webkit-tap-highlight-color: rgba(var(--color-primary-rgb), 0.25);
-    -moz-tap-highlight-color: rgba(var(--color-primary-rgb), 0.25);
-    -o-tap-highlight-color: rgba(var(--color-primary-rgb), 0.25);
-    tap-highlight-color: rgba(var(--color-primary-rgb), 0.25);
   }
 
   input:not(:checked, :disabled):hover {
