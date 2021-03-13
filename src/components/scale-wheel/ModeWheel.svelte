@@ -1,7 +1,7 @@
 <script lang="ts">
   import { circlePathDef, ringArcPathDef } from "@/utilities/svg";
 
-  import type { ModeDef } from "@/music/modes";
+  import type { ModeDef } from "@/config/types";
   import { createEventDispatcher } from "svelte";
 
   export let outerRadius: number;

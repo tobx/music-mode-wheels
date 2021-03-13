@@ -2,11 +2,13 @@
   import PageContent from "./components/page/PageContent.svelte";
   import PageFooter from "./components/page/PageFooter.svelte";
   import PageHeader from "./components/page/PageHeader.svelte";
+
+  const title = document.title;
 </script>
 
 <div class="app">
   <PageHeader />
-  <PageContent />
+  <PageContent {title} />
   <PageFooter />
 </div>
 

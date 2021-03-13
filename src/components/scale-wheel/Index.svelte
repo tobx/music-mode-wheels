@@ -1,8 +1,8 @@
 <script lang="ts">
   import { controller, state, tempo } from "@/stores/sampler";
 
+  import type { ModeDef } from "@/config/types";
   import ModeWheel from "./ModeWheel.svelte";
-  import type { ModeDef } from "@/music/modes";
   import PianoWheel from "./PianoWheel.svelte";
   import PlayButton from "./PlayButton.svelte";
   import type { PlayButtonState } from "./types";

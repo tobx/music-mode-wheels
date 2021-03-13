@@ -1,14 +1,11 @@
-import { InstrumentPreset, Library } from "@/music/library";
 import { derived, writable } from "svelte/store";
 
-import type { NotePattern } from "@/music/sampler";
-import { Sampler } from "@/music/sampler";
-import { config } from "@/config";
+import { Library } from "@/instruments/library";
+import type { NotePattern } from "@/instruments/sampler";
+import { Sampler } from "@/instruments/sampler";
+import config from "@/config/instruments";
 
-export const library = new Library(
-  config.instruments.libraryUrl,
-  config.instruments.index
-);
+export const library = new Library(config.library.url, config.library.index);
 
 const sampler = new Sampler(library);
 
@@ -18,9 +15,9 @@ const { set: setState, update: updateState, ...state } = writable<
 
 export { state };
 
-export const instrumentId = writable(config.instruments.defaultPreset.id);
+export const instrumentId = writable(config.defaultPreset.id);
 
-export const tempo = writable(config.instruments.defaultPreset.tempo);
+export const tempo = writable(config.defaultPreset.tempo);
 
 const preset = derived([instrumentId, tempo], ([id, tempo]) => {
   return { id, tempo };

@@ -1,7 +1,9 @@
 <script lang="ts">
-  import ScaleWheel from "../scale-wheel/Index.svelte";
   import PlaybackOptions from "../settings/PlaybackOptions.svelte";
-  import { modeDefs } from "@/music/modes";
+  import ScaleWheel from "../scale-wheel/Index.svelte";
+  import modeDefs from "@/config/modes";
+
+  export let title: string;
 
   const modes = [
     { name: "Melodic Major", defs: modeDefs.melodic.major },
@@ -12,7 +14,7 @@
 </script>
 
 <main>
-  <h1>Music Mode Wheels</h1>
+  <h1>{title}</h1>
   <div>
     <h3>Playback Options</h3>
     <PlaybackOptions />

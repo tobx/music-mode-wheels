@@ -1,4 +1,5 @@
 import { Decoder } from "@/utilities/audio";
+import type { LibraryIndex } from "@/config/types";
 import { joinPaths } from "@/utilities/path";
 
 export type Instrument = {
@@ -10,18 +11,6 @@ export type Instrument = {
 export type InstrumentPreset = {
   id: string;
   tempo: number;
-};
-
-type LibraryIndexEntry = {
-  name: string;
-  presets: {
-    tempo: number;
-    path: string;
-  }[];
-};
-
-export type LibraryIndex = {
-  [id: string]: LibraryIndexEntry;
 };
 
 type SampleIndex = {
