@@ -7,6 +7,8 @@
   import PlayButton from "./PlayButton.svelte";
   import type { PlayButtonState } from "./types";
   import { onMount } from "svelte";
+  import type { NotePattern } from "@/instruments/sampler";
+  import { rotate } from "@/utilities/array";
 
   export let modeDefs: ModeDef[];
 
@@ -22,45 +24,75 @@
   const keyOuterRadius = (Math.min(width, height) * 3) / 8;
   const modeOuterRadius = (Math.min(width, height) * 15) / 32;
 
+  let pianoWheel: PianoWheel;
+
   let activeKey: string = "C";
   let activeModeIndex: number = 0;
 
   let isPlaying = false;
   let playButtonState: PlayButtonState;
 
+  function noteToKey(note: string) {
+    return note.slice(0, -1);
+  }
+
   async function handlePlayButtonClick() {
     if ($state === "loaded") {
+      const wasPlaying = isPlaying;
       controller.stop();
-      if (!isPlaying) {
+      if (!wasPlaying) {
         playScale();
       }
     }
   }
 
-  async function playScale() {
+  function playPattern(pattern: NotePattern) {
+    isPlaying = true;
+    let pressedKey = "";
+    controller.play(
+      pattern,
+      (note) => {
+        pianoWheel.releaseKey(pressedKey);
+        if (note === undefined) {
+          isPlaying = false;
+        } else {
+          pressedKey = noteToKey(note);
+          pianoWheel.pressKey(pressedKey);
+        }
+      },
+      () => {
+        pianoWheel.releaseKey(pressedKey);
+        isPlaying = false;
+      }
+    );
+  }
+
+  function playScale() {
     const length = 60 / $tempo / 2;
-    const rotated = [
-      ...modeDefs.slice(activeModeIndex),
-      ...modeDefs.slice(0, activeModeIndex),
-    ];
+    const rotated = rotate(modeDefs, activeModeIndex);
     const offset = rotated[0].semitones;
     let semitones = rotated.map(
       ({ semitones }) => (semitones + 12 - offset) % 12
     );
     semitones = [...semitones, 12, ...semitones.reverse()];
-    const keyIndex = notes.findIndex((note) => note.slice(0, -1) === activeKey);
-    const pattern = semitones.map((semitones, i) => ({
+    const keyIndex = notes.findIndex((note) => noteToKey(note) === activeKey);
+    const pattern: NotePattern = semitones.map((semitones, i) => ({
       note: notes[keyIndex + semitones],
       delay: i === 0 ? 0 : length,
     }));
-    isPlaying = true;
-    await controller.play(pattern);
-    isPlaying = false;
+    pattern.push({ delay: length });
+    playPattern(pattern);
   }
 
   $: {
-    playButtonState =
-      $state !== "loaded" ? "loading" : isPlaying ? "playing" : "stopped";
+    if ($state === "loaded") {
+      playButtonState = isPlaying ? "playing" : "stopped";
+    } else {
+      if (isPlaying) {
+        controller.stop();
+      }
+      playButtonState = "loading";
+    }
   }
 
   onMount(() => {
@@ -78,6 +110,7 @@
     <g transform="rotate(-15)">
       <PianoWheel
         radius={keyOuterRadius}
+        bind:this={pianoWheel}
         on:keyChanged={({ detail }) => (activeKey = detail)}
       />
       <ModeWheel
@@ -92,8 +125,9 @@
 
 <style>
   svg {
-    --color-black-key: var(--color-text);
-    --color-white-key: var(--white);
+    --color-key-black: var(--color-text);
+    --color-key-pressed: var(--red-500);
+    --color-key-white: var(--white);
 
     stroke-width: 0.67;
     user-select: none;

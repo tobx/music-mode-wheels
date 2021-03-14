@@ -53,8 +53,8 @@
 
 <style>
   path {
-    fill: var(--color-black-key);
-    stroke: var(--color-black-key);
+    fill: var(--color-key-black);
+    stroke: var(--color-key-black);
     stroke-linejoin: round;
   }
 </style>

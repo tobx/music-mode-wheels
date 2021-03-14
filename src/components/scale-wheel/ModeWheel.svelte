@@ -121,7 +121,7 @@
   }
 
   .mode text {
-    fill: var(--color-black-key);
+    fill: var(--color-key-black);
   }
 
   .mode circle {
@@ -134,6 +134,6 @@
   }
 
   .mode.selected text {
-    fill: var(--color-white-key);
+    fill: var(--color-key-white);
   }
 </style>

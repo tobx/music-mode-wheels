@@ -1,6 +1,7 @@
-export async function animationFrame(idHandler: (id: number) => void) {
+export async function animationFrame(idHandler?: (id: number) => void) {
   return await new Promise<number>((resolve) => {
-    idHandler(window.requestAnimationFrame(resolve));
+    const requestId = window.requestAnimationFrame(resolve);
+    idHandler?.(requestId);
   });
 }
 
@@ -25,7 +26,7 @@ export class AnimationLoop {
     window.cancelAnimationFrame(this.requestId);
   }
 
-  async loop() {
+  private async loop() {
     const time = await animationFrame((id) => (this.requestId = id));
     const elapsedTime = time - this.startTime;
     if (elapsedTime < this.duration) {

@@ -1,3 +1,5 @@
+import { animationFrame } from "./animation";
+
 // Safari 14.0.2 supports `AudioContext` with `webkit` prefix only.
 const AudioContext: typeof window.AudioContext =
   window.AudioContext ?? window.webkitAudioContext;
@@ -31,6 +33,8 @@ export class Player {
 
   private sources: Set<AudioBufferSourceNode> = new Set();
 
+  private timers: Set<Timer> = new Set();
+
   constructor() {
     this.gainNode = this.createGain();
   }
@@ -45,8 +49,19 @@ export class Player {
     return gainNode;
   }
 
+  setTimer(when: number, callback: () => void) {
+    const timer = new Timer(this.context, when);
+    this.timers.add(timer);
+    timer.start(() => {
+      this.timers.delete(timer);
+      callback();
+    });
+  }
+
   // fade out to prevent clicking
   async stop(fadeDuration = 0.04, fadeToDecibel = -96, latency = 0.01) {
+    this.timers.forEach((timer) => timer.stop());
+    this.timers.clear();
     const startTime = this.context.currentTime + latency;
     const stopTime = startTime + fadeDuration;
     const timeConstant = (fadeDuration * 20) / (fadeToDecibel * -Math.log(10));
@@ -73,5 +88,23 @@ export class Player {
     await ended(source);
     this.sources.delete(source);
     source.disconnect();
+  }
+}
+
+export class Timer {
+  private requestId = 0;
+
+  constructor(private context: AudioContext, private when: number) {}
+
+  stop() {
+    window.cancelAnimationFrame(this.requestId);
+  }
+
+  async start(callback: () => void) {
+    this.stop();
+    while (this.context.currentTime < this.when) {
+      await animationFrame((id) => (this.requestId = id));
+    }
+    callback();
   }
 }

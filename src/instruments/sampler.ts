@@ -2,14 +2,14 @@ import type { InstrumentPreset, Library } from "./library";
 
 import { Player } from "@/utilities/audio";
 
-export type NotePattern = { note: string; delay: number }[];
+export type NotePattern = { note?: string; delay: number }[];
 
 export class Sampler {
   private player = new Player();
 
   private buffers: { [note: string]: AudioBuffer } = {};
 
-  constructor(private library: Library, private latency = 0.01) {}
+  constructor(private library: Library, private latency = 0.005) {}
 
   async load(instrument: InstrumentPreset) {
     await this.unload();
@@ -31,11 +31,16 @@ export class Sampler {
     }
   }
 
-  async playPattern(pattern: NotePattern) {
+  async playPattern(pattern: NotePattern, listener?: (note?: string) => void) {
     let when = this.player.currentTime + this.latency;
     const playbacks = pattern.map(async ({ note, delay }) => {
       when += delay;
-      await this.playNote(note, when);
+      if (listener !== undefined) {
+        this.player.setTimer(when, () => listener(note));
+      }
+      if (note !== undefined) {
+        await this.playNote(note, when);
+      }
     });
     await Promise.all(playbacks);
   }

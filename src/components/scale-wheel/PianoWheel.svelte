@@ -7,6 +7,14 @@
 
   const dispatch = createEventDispatcher<{ keyChanged: string }>();
 
+  export function pressKey(key: string) {
+    pressedKeys[key] = true;
+  }
+
+  export function releaseKey(key: string) {
+    pressedKeys[key] = false;
+  }
+
   const blackKeyInnerRadius = (2 / 3) * radius;
   const whiteKeyInnerRadius = radius / 2;
   const keyTextRadius = (radius + blackKeyInnerRadius) / 2 - 1;
@@ -61,6 +69,8 @@
 
   const whiteKeys = keys.filter((key) => key.isWhite);
 
+  const pressedKeys: { [key: string]: boolean } = {};
+
   let selectedKey = keys[0];
 
   let wheelRotation = 0;
@@ -79,6 +89,7 @@
   {#each whiteKeys.concat(blackKeys) as key}
     <g
       class="key {key.type}"
+      class:pressed={pressedKeys[key.name] === true}
       class:selected={key === selectedKey}
       transform="rotate({key.rotation})"
       on:click={() => selectKey(key)}
@@ -112,22 +123,22 @@
   }
 
   .key.black path {
-    fill: var(--color-black-key);
+    fill: var(--color-key-black);
     stroke: var(--color-border);
   }
 
   .key.black text {
-    fill: var(--color-white-key);
+    fill: var(--color-key-white);
     font-size: 10px;
   }
 
   .key.white path {
-    fill: var(--color-white-key);
+    fill: var(--color-key-white);
     stroke: var(--color-border);
   }
 
   .key.white text {
-    fill: var(--color-black-key);
+    fill: var(--color-key-black);
     font-size: 14px;
     font-weight: 400;
   }
@@ -137,7 +148,7 @@
   }
 
   .key:hover text {
-    fill: var(--color-black-key);
+    fill: var(--color-key-black);
   }
 
   .key:active path {
@@ -149,6 +160,14 @@
   }
 
   .key.selected text {
-    fill: var(--color-white-key);
+    fill: var(--color-key-white);
+  }
+
+  .key.pressed path {
+    fill: var(--color-key-pressed);
+  }
+
+  .key.pressed text {
+    fill: var(--color-key-white);
   }
 </style>

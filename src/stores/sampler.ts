@@ -37,11 +37,25 @@ preset.subscribe(async ($preset) => {
   }
 });
 
+const stopListeners = new Set<() => void>();
+
 export const controller = {
-  play: async (pattern: NotePattern) => {
-    await sampler.playPattern(pattern);
+  play: async (
+    pattern: NotePattern,
+    noteListener?: (note?: string) => void,
+    stopListener?: () => void
+  ) => {
+    if (stopListener !== undefined) {
+      stopListeners.add(stopListener);
+    }
+    await sampler.playPattern(pattern, noteListener);
+    if (stopListener !== undefined) {
+      stopListeners.delete(stopListener);
+    }
   },
   stop: async () => {
+    stopListeners.forEach((listener) => listener());
+    stopListeners.clear();
     await sampler.stop();
   },
   unload: async () => {
